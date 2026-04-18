@@ -1,0 +1,90 @@
+<svg width="860" height="480" xmlns="http://www.w3.org/2000/svg" font-family="Arial, sans-serif">
+  <rect width="860" height="480" fill="#f8f9fa"/>
+  <text x="430" y="32" text-anchor="middle" font-size="18" font-weight="bold" fill="#20232a">DuckLake Cloud — Arkitektur</text>
+
+  <!-- KTH Cloud box -->
+  <rect x="20" y="50" width="820" height="390" rx="14" fill="none" stroke="#28a745" stroke-width="2" stroke-dasharray="8"/>
+  <text x="430" y="46" text-anchor="middle" font-size="11" fill="#28a745" font-weight="bold">KTH Cloud</text>
+
+  <!-- ── Deployment 1: PostgreSQL ── -->
+  <rect x="50" y="180" width="200" height="110" rx="10" fill="white" stroke="#6f42c1" stroke-width="2"/>
+  <rect x="50" y="180" width="200" height="35" rx="10" fill="#6f42c1"/>
+  <rect x="50" y="203" width="200" height="12" fill="#6f42c1"/>
+  <text x="150" y="202" text-anchor="middle" font-size="12" font-weight="bold" fill="white">Deployment 1</text>
+  <text x="150" y="232" text-anchor="middle" font-size="13" font-weight="bold" fill="#6f42c1">PostgreSQL</text>
+  <text x="150" y="250" text-anchor="middle" font-size="10" fill="#555">DuckLake-katalog</text>
+  <text x="150" y="265" text-anchor="middle" font-size="10" fill="#555">Lagrar tabellstruktur</text>
+  <text x="150" y="278" text-anchor="middle" font-size="10" fill="#888">port 5432 • Private</text>
+  <!-- Persistent storage badge -->
+  <rect x="75" y="284" width="150" height="18" rx="4" fill="#e2d9f3"/>
+  <text x="150" y="296" text-anchor="middle" font-size="9" fill="#6f42c1">💾 Persistent volym</text>
+
+  <!-- ── Deployment 2: MinIO ── -->
+  <rect x="330" y="180" width="200" height="110" rx="10" fill="white" stroke="#fd7e14" stroke-width="2"/>
+  <rect x="330" y="180" width="200" height="35" rx="10" fill="#fd7e14"/>
+  <rect x="330" y="203" width="200" height="12" fill="#fd7e14"/>
+  <text x="430" y="202" text-anchor="middle" font-size="12" font-weight="bold" fill="white">Deployment 2</text>
+  <text x="430" y="232" text-anchor="middle" font-size="13" font-weight="bold" fill="#fd7e14">MinIO</text>
+  <text x="430" y="250" text-anchor="middle" font-size="10" fill="#555">S3-kompatibel lagring</text>
+  <text x="430" y="265" text-anchor="middle" font-size="10" fill="#555">Lagrar Parquet-filer</text>
+  <text x="430" y="278" text-anchor="middle" font-size="10" fill="#888">port 9000 • Private</text>
+  <rect x="355" y="284" width="150" height="18" rx="4" fill="#fde8d8"/>
+  <text x="430" y="296" text-anchor="middle" font-size="9" fill="#fd7e14">💾 Persistent volym</text>
+
+  <!-- ── Deployment 3: FastAPI ── -->
+  <rect x="610" y="180" width="200" height="110" rx="10" fill="white" stroke="#17a2b8" stroke-width="2"/>
+  <rect x="610" y="180" width="200" height="35" rx="10" fill="#17a2b8"/>
+  <rect x="610" y="203" width="200" height="12" fill="#17a2b8"/>
+  <text x="710" y="202" text-anchor="middle" font-size="12" font-weight="bold" fill="white">Deployment 3</text>
+  <text x="710" y="232" text-anchor="middle" font-size="13" font-weight="bold" fill="#17a2b8">FastAPI</text>
+  <text x="710" y="250" text-anchor="middle" font-size="10" fill="#555">REST API</text>
+  <text x="710" y="265" text-anchor="middle" font-size="10" fill="#555">Exponerar datan via HTTP</text>
+  <text x="710" y="278" text-anchor="middle" font-size="10" fill="#888">port 8000 • Public</text>
+  <rect x="635" y="284" width="150" height="18" rx="4" fill="#d1ecf1"/>
+  <text x="710" y="296" text-anchor="middle" font-size="9" fill="#17a2b8">Ingen persistent storage</text>
+
+  <!-- Arrow FastAPI → PostgreSQL -->
+  <line x1="610" y1="235" x2="255" y2="235" stroke="#6f42c1" stroke-width="2" marker-end="url(#ap)"/>
+  <text x="432" y="224" text-anchor="middle" font-size="10" fill="#6f42c1">POSTGRES_HOST=ducklake-postgres2</text>
+
+  <!-- Arrow FastAPI → MinIO -->
+  <line x1="610" y1="255" x2="535" y2="255" stroke="#fd7e14" stroke-width="2" marker-end="url(#ao)"/>
+  <text x="572" y="244" text-anchor="middle" font-size="10" fill="#fd7e14">S3_ENDPOINT=ducklake-minio:9000</text>
+
+  <!-- ── Clients ── -->
+  <!-- Python client -->
+  <rect x="50" y="70" width="150" height="55" rx="8" fill="#cfe2ff" stroke="#0d6efd" stroke-width="1.5"/>
+  <text x="125" y="91" text-anchor="middle" font-size="12" font-weight="bold" fill="#0d6efd">Python-klient</text>
+  <text x="125" y="107" text-anchor="middle" font-size="10" fill="#444">requests.get/post/delete</text>
+  <text x="125" y="120" text-anchor="middle" font-size="9" fill="#888">GET /api/kunder etc.</text>
+
+  <!-- Java client -->
+  <rect x="230" y="70" width="150" height="55" rx="8" fill="#f8d7da" stroke="#dc3545" stroke-width="1.5"/>
+  <text x="305" y="91" text-anchor="middle" font-size="12" font-weight="bold" fill="#dc3545">Java-klient</text>
+  <text x="305" y="107" text-anchor="middle" font-size="10" fill="#444">HttpClient GET/POST</text>
+  <text x="305" y="120" text-anchor="middle" font-size="9" fill="#888">header: X-API-Key</text>
+
+  <!-- Arrow clients → FastAPI -->
+  <line x1="200" y1="97" x2="660" y2="180" stroke="#0d6efd" stroke-width="1.5" stroke-dasharray="5" marker-end="url(#ab)"/>
+  <line x1="380" y1="97" x2="680" y2="180" stroke="#dc3545" stroke-width="1.5" stroke-dasharray="5" marker-end="url(#ar)"/>
+  <text x="490" y="130" text-anchor="middle" font-size="10" fill="#555" font-weight="bold">HTTP</text>
+
+  <!-- DuckDB inside FastAPI -->
+  <rect x="635" y="310" width="150" height="40" rx="6" fill="#fff3cd" stroke="#ffc107" stroke-width="1.5"/>
+  <text x="710" y="328" text-anchor="middle" font-size="11" font-weight="bold" fill="#856404">DuckDB</text>
+  <text x="710" y="342" text-anchor="middle" font-size="9" fill="#555">inbyggt i FastAPI-processen</text>
+  <line x1="710" y1="295" x2="710" y2="310" stroke="#555" stroke-width="1.5" marker-end="url(#ag)"/>
+
+  <!-- DuckLake label -->
+  <rect x="50" y="395" width="480" height="30" rx="6" fill="#d4edda" stroke="#28a745" stroke-width="1"/>
+  <text x="290" y="415" text-anchor="middle" font-size="11" font-weight="bold" fill="#155724">DuckLake = PostgreSQL (katalog) + MinIO (Parquet-filer)</text>
+
+  <!-- Arrow markers -->
+  <defs>
+    <marker id="ap" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#6f42c1"/></marker>
+    <marker id="ao" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#fd7e14"/></marker>
+    <marker id="ab" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#0d6efd"/></marker>
+    <marker id="ar" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#dc3545"/></marker>
+    <marker id="ag" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#555"/></marker>
+  </defs>
+</svg>

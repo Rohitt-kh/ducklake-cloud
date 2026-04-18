@@ -1,0 +1,64 @@
+<svg width="860" height="380" xmlns="http://www.w3.org/2000/svg" font-family="Arial, sans-serif">
+  <rect width="860" height="380" fill="#f8f9fa"/>
+  <text x="430" y="32" text-anchor="middle" font-size="18" font-weight="bold" fill="#20232a">Varför PostgreSQL + MinIO? Jämförelse</text>
+
+  <!-- Headers -->
+  <rect x="20" y="50" width="260" height="40" rx="8" fill="#e9ecef" stroke="#adb5bd" stroke-width="1"/>
+  <text x="150" y="75" text-anchor="middle" font-size="12" font-weight="bold" fill="#495057">Egenskap</text>
+
+  <rect x="300" y="50" width="240" height="40" rx="8" fill="#cfe2ff" stroke="#0d6efd" stroke-width="2"/>
+  <text x="420" y="68" text-anchor="middle" font-size="12" font-weight="bold" fill="#0d6efd">Lokal disk</text>
+  <text x="420" y="83" text-anchor="middle" font-size="10" fill="#0d6efd">(katalog.duckdb + volym)</text>
+
+  <rect x="560" y="50" width="280" height="40" rx="8" fill="#d4edda" stroke="#28a745" stroke-width="2"/>
+  <text x="700" y="68" text-anchor="middle" font-size="12" font-weight="bold" fill="#28a745">PostgreSQL + MinIO</text>
+  <text x="700" y="83" text-anchor="middle" font-size="10" fill="#28a745">(detta repo)</text>
+
+  <!-- Rows -->
+  <rect x="20" y="100" width="820" height="35" rx="0" fill="white"/>
+  <text x="150" y="122" text-anchor="middle" font-size="11" fill="#333">DuckLake-konceptet</text>
+  <text x="420" y="122" text-anchor="middle" font-size="11" fill="#dc3545">✗ Förenklat testupplägg</text>
+  <text x="700" y="122" text-anchor="middle" font-size="11" fill="#28a745">✓ Produktionsupplägg</text>
+
+  <rect x="20" y="135" width="820" height="35" rx="0" fill="#f8f9fa"/>
+  <text x="150" y="157" text-anchor="middle" font-size="11" fill="#333">Katalog</text>
+  <text x="420" y="157" text-anchor="middle" font-size="11" fill="#555">.duckdb fil på disk</text>
+  <text x="700" y="157" text-anchor="middle" font-size="11" fill="#28a745">PostgreSQL (dedikerad DB)</text>
+
+  <rect x="20" y="170" width="820" height="35" rx="0" fill="white"/>
+  <text x="150" y="192" text-anchor="middle" font-size="11" fill="#333">Datalagring</text>
+  <text x="420" y="192" text-anchor="middle" font-size="11" fill="#555">Lokal disk (persistent volym)</text>
+  <text x="700" y="192" text-anchor="middle" font-size="11" fill="#28a745">MinIO (S3-objekt-lagring)</text>
+
+  <rect x="20" y="205" width="820" height="35" rx="0" fill="#f8f9fa"/>
+  <text x="150" y="227" text-anchor="middle" font-size="11" fill="#333">Skalbarhet</text>
+  <text x="420" y="227" text-anchor="middle" font-size="11" fill="#dc3545">Begränsad (disk-storlek)</text>
+  <text x="700" y="227" text-anchor="middle" font-size="11" fill="#28a745">Obegränsad</text>
+
+  <rect x="20" y="240" width="820" height="35" rx="0" fill="white"/>
+  <text x="150" y="262" text-anchor="middle" font-size="11" fill="#333">Antal deployments</text>
+  <text x="420" y="262" text-anchor="middle" font-size="11" fill="#28a745">1</text>
+  <text x="700" y="262" text-anchor="middle" font-size="11" fill="#fd7e14">3 (API + PostgreSQL + MinIO)</text>
+
+  <rect x="20" y="275" width="820" height="35" rx="0" fill="#f8f9fa"/>
+  <text x="150" y="297" text-anchor="middle" font-size="11" fill="#333">Komplexitet</text>
+  <text x="420" y="297" text-anchor="middle" font-size="11" fill="#28a745">Låg — enkel att sätta upp</text>
+  <text x="700" y="297" text-anchor="middle" font-size="11" fill="#fd7e14">Högre — 3 tjänster att konfigurera</text>
+
+  <rect x="20" y="310" width="820" height="35" rx="0" fill="white"/>
+  <text x="150" y="332" text-anchor="middle" font-size="11" fill="#333">Rekommenderas för</text>
+  <text x="420" y="332" text-anchor="middle" font-size="11" fill="#555">Utveckling / demo</text>
+  <text x="700" y="332" text-anchor="middle" font-size="11" fill="#28a745">Produktion / korrekt DuckLake</text>
+
+  <!-- Border lines -->
+  <line x1="20" y1="100" x2="840" y2="100" stroke="#dee2e6" stroke-width="1"/>
+  <line x1="20" y1="135" x2="840" y2="135" stroke="#dee2e6" stroke-width="1"/>
+  <line x1="20" y1="170" x2="840" y2="170" stroke="#dee2e6" stroke-width="1"/>
+  <line x1="20" y1="205" x2="840" y2="205" stroke="#dee2e6" stroke-width="1"/>
+  <line x1="20" y1="240" x2="840" y2="240" stroke="#dee2e6" stroke-width="1"/>
+  <line x1="20" y1="275" x2="840" y2="275" stroke="#dee2e6" stroke-width="1"/>
+  <line x1="20" y1="310" x2="840" y2="310" stroke="#dee2e6" stroke-width="1"/>
+  <line x1="290" y1="50" x2="290" y2="345" stroke="#dee2e6" stroke-width="1"/>
+  <line x1="550" y1="50" x2="550" y2="345" stroke="#dee2e6" stroke-width="1"/>
+  <rect x="20" y="50" width="820" height="295" rx="0" fill="none" stroke="#dee2e6" stroke-width="1"/>
+</svg>

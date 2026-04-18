@@ -1,0 +1,100 @@
+<svg width="860" height="400" xmlns="http://www.w3.org/2000/svg" font-family="Arial, sans-serif">
+  <rect width="860" height="400" fill="#f8f9fa"/>
+  <text x="430" y="32" text-anchor="middle" font-size="18" font-weight="bold" fill="#20232a">Hur data flödar — från klient till DuckLake</text>
+
+  <!-- Step 1 -->
+  <rect x="20" y="80" width="140" height="200" rx="10" fill="white" stroke="#0d6efd" stroke-width="2"/>
+  <rect x="20" y="80" width="140" height="32" rx="10" fill="#0d6efd"/>
+  <rect x="20" y="100" width="140" height="12" fill="#0d6efd"/>
+  <text x="90" y="100" text-anchor="middle" font-size="11" font-weight="bold" fill="white">① Klient</text>
+  <text x="90" y="135" text-anchor="middle" font-size="10" fill="#333">Skickar HTTP-anrop</text>
+  <text x="90" y="152" text-anchor="middle" font-size="10" fill="#333">GET → läsa data</text>
+  <text x="90" y="169" text-anchor="middle" font-size="10" fill="#333">POST → skriva data</text>
+  <text x="90" y="186" text-anchor="middle" font-size="10" fill="#333">DELETE → radera</text>
+  <rect x="35" y="200" width="110" height="30" rx="5" fill="#cfe2ff"/>
+  <text x="90" y="210" text-anchor="middle" font-size="9" fill="#0d6efd">Python: requests</text>
+  <text x="90" y="222" text-anchor="middle" font-size="9" fill="#0d6efd">Java: HttpClient</text>
+  <text x="90" y="238" text-anchor="middle" font-size="9" fill="#888">POST kräver</text>
+  <text x="90" y="250" text-anchor="middle" font-size="9" fill="#888">X-API-Key header</text>
+  <text x="90" y="265" text-anchor="middle" font-size="9" fill="#888">för skrivoperationer</text>
+
+  <!-- Arrow 1→2 -->
+  <line x1="160" y1="180" x2="195" y2="180" stroke="#555" stroke-width="2" marker-end="url(#a1)"/>
+  <text x="177" y="170" text-anchor="middle" font-size="9" fill="#555">HTTP</text>
+
+  <!-- Step 2 -->
+  <rect x="195" y="80" width="150" height="200" rx="10" fill="white" stroke="#17a2b8" stroke-width="2"/>
+  <rect x="195" y="80" width="150" height="32" rx="10" fill="#17a2b8"/>
+  <rect x="195" y="100" width="150" height="12" fill="#17a2b8"/>
+  <text x="270" y="100" text-anchor="middle" font-size="11" font-weight="bold" fill="white">② FastAPI</text>
+  <text x="270" y="135" text-anchor="middle" font-size="10" fill="#333">Tar emot anropet</text>
+  <text x="270" y="152" text-anchor="middle" font-size="10" fill="#333">Verifierar API-nyckel</text>
+  <text x="270" y="169" text-anchor="middle" font-size="10" fill="#333">Kör SQL via DuckDB</text>
+  <text x="270" y="195" text-anchor="middle" font-size="9" fill="#888">Exempel:</text>
+  <text x="270" y="210" text-anchor="middle" font-size="9" fill="#17a2b8">SELECT * FROM</text>
+  <text x="270" y="223" text-anchor="middle" font-size="9" fill="#17a2b8">lake.kunder</text>
+  <text x="270" y="245" text-anchor="middle" font-size="9" fill="#888">Returnerar JSON</text>
+  <text x="270" y="258" text-anchor="middle" font-size="9" fill="#888">till klienten</text>
+
+  <!-- Arrow 2→3 -->
+  <line x1="345" y1="180" x2="385" y2="180" stroke="#555" stroke-width="2" marker-end="url(#a1)"/>
+  <text x="365" y="170" text-anchor="middle" font-size="9" fill="#555">duckdb</text>
+
+  <!-- Step 3 -->
+  <rect x="385" y="80" width="150" height="200" rx="10" fill="white" stroke="#ffc107" stroke-width="2"/>
+  <rect x="385" y="80" width="150" height="32" rx="10" fill="#ffc107"/>
+  <rect x="385" y="100" width="150" height="12" fill="#ffc107"/>
+  <text x="460" y="100" text-anchor="middle" font-size="11" font-weight="bold" fill="white">③ DuckDB</text>
+  <text x="460" y="135" text-anchor="middle" font-size="10" fill="#333">Kör queryn</text>
+  <text x="460" y="152" text-anchor="middle" font-size="10" fill="#333">Frågar PostgreSQL:</text>
+  <text x="460" y="169" text-anchor="middle" font-size="10" fill="#333">"Var finns tabellen?"</text>
+  <text x="460" y="186" text-anchor="middle" font-size="10" fill="#333">Hämtar Parquet</text>
+  <text x="460" y="203" text-anchor="middle" font-size="10" fill="#333">från MinIO</text>
+  <text x="460" y="228" text-anchor="middle" font-size="9" fill="#888">ducklake extension</text>
+  <text x="460" y="243" text-anchor="middle" font-size="9" fill="#888">hanterar allt detta</text>
+  <text x="460" y="258" text-anchor="middle" font-size="9" fill="#888">automatiskt</text>
+
+  <!-- Arrow 3→4 PostgreSQL -->
+  <line x1="535" y1="160" x2="575" y2="140" stroke="#6f42c1" stroke-width="2" marker-end="url(#a2)"/>
+  <!-- Arrow 3→5 MinIO -->
+  <line x1="535" y1="200" x2="575" y2="240" stroke="#fd7e14" stroke-width="2" marker-end="url(#a3)"/>
+
+  <!-- Step 4: PostgreSQL -->
+  <rect x="575" y="70" width="160" height="100" rx="10" fill="white" stroke="#6f42c1" stroke-width="2"/>
+  <rect x="575" y="70" width="160" height="32" rx="10" fill="#6f42c1"/>
+  <rect x="575" y="90" width="160" height="12" fill="#6f42c1"/>
+  <text x="655" y="90" text-anchor="middle" font-size="11" font-weight="bold" fill="white">④ PostgreSQL</text>
+  <text x="655" y="122" text-anchor="middle" font-size="10" fill="#333">Katalog — svarar:</text>
+  <text x="655" y="138" text-anchor="middle" font-size="10" fill="#6f42c1">"kunder finns i</text>
+  <text x="655" y="152" text-anchor="middle" font-size="10" fill="#6f42c1">s3://ducklake/kunder/"</text>
+
+  <!-- Step 5: MinIO -->
+  <rect x="575" y="210" width="160" height="100" rx="10" fill="white" stroke="#fd7e14" stroke-width="2"/>
+  <rect x="575" y="210" width="160" height="32" rx="10" fill="#fd7e14"/>
+  <rect x="575" y="230" width="160" height="12" fill="#fd7e14"/>
+  <text x="655" y="230" text-anchor="middle" font-size="11" font-weight="bold" fill="white">⑤ MinIO</text>
+  <text x="655" y="262" text-anchor="middle" font-size="10" fill="#333">Returnerar</text>
+  <text x="655" y="278" text-anchor="middle" font-size="10" fill="#fd7e14">kunder.parquet</text>
+  <text x="655" y="294" text-anchor="middle" font-size="9" fill="#888">den faktiska datan</text>
+
+  <!-- Result -->
+  <rect x="760" y="140" width="80" height="60" rx="8" fill="#d4edda" stroke="#28a745" stroke-width="1.5"/>
+  <text x="800" y="163" text-anchor="middle" font-size="10" font-weight="bold" fill="#155724">JSON</text>
+  <text x="800" y="178" text-anchor="middle" font-size="9" fill="#155724">svar till</text>
+  <text x="800" y="191" text-anchor="middle" font-size="9" fill="#155724">klienten</text>
+  <line x1="735" y1="120" x2="770" y2="160" stroke="#28a745" stroke-width="1.5" marker-end="url(#a4)"/>
+  <line x1="735" y1="260" x2="770" y2="190" stroke="#28a745" stroke-width="1.5" marker-end="url(#a4)"/>
+
+  <!-- Bottom note -->
+  <rect x="20" y="320" width="820" height="55" rx="8" fill="white" stroke="#dee2e6" stroke-width="1"/>
+  <text x="430" y="342" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">Viktigt att förstå</text>
+  <text x="430" y="360" text-anchor="middle" font-size="10" fill="#555">Klienten (Python/Java) behöver bara känna till FastAPI:s URL — PostgreSQL och MinIO är helt dolda.</text>
+  <text x="430" y="375" text-anchor="middle" font-size="10" fill="#555">DuckDB sköter kommunikationen med PostgreSQL och MinIO automatiskt i bakgrunden.</text>
+
+  <defs>
+    <marker id="a1" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#555"/></marker>
+    <marker id="a2" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#6f42c1"/></marker>
+    <marker id="a3" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#fd7e14"/></marker>
+    <marker id="a4" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#28a745"/></marker>
+  </defs>
+</svg>
