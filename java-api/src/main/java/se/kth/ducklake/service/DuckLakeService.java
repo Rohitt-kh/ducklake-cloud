@@ -41,34 +41,32 @@ public class DuckLakeService {
             stmt.execute("LOAD ducklake");
             stmt.execute("LOAD postgres");
 
-            stmt.execute(String.format("""
-                CREATE OR REPLACE SECRET pg_secret (
-                    TYPE postgres,
-                    HOST '%s', PORT %s,
-                    DATABASE '%s',
-                    USER '%s', PASSWORD '%s'
-                )""", pgHost, pgPort, pgDb, pgUser, pgPass));
+            stmt.execute(("CREATE OR REPLACE SECRET pg_secret (" +
+                "TYPE postgres, " +
+                "HOST '" + pgHost + "', " +
+                "PORT " + pgPort + ", " +
+                "DATABASE '" + pgDb + "', " +
+                "USER '" + pgUser + "', " +
+                "PASSWORD '" + pgPass + "')"));
 
             String dataPath;
             if (!s3Endpoint.isBlank()) {
                 stmt.execute("LOAD httpfs");
-                stmt.execute(String.format("""
-                    CREATE OR REPLACE SECRET s3_secret (
-                        TYPE s3,
-                        KEY_ID '%s', SECRET '%s',
-                        REGION '%s', ENDPOINT '%s',
-                        URL_STYLE 'path', USE_SSL false
-                    )""", s3KeyId, s3Secret, s3Region, s3Endpoint));
+                stmt.execute("CREATE OR REPLACE SECRET s3_secret (" +
+                    "TYPE s3, " +
+                    "KEY_ID '" + s3KeyId + "', " +
+                    "SECRET '" + s3Secret + "', " +
+                    "REGION '" + s3Region + "', " +
+                    "ENDPOINT '" + s3Endpoint + "', " +
+                    "URL_STYLE 'path', " +
+                    "USE_SSL false)");
                 dataPath = "s3://" + s3Bucket + "/";
             } else {
                 dataPath = "./data/lake/";
                 new java.io.File(dataPath).mkdirs();
             }
 
-            stmt.execute(String.format("""
-                ATTACH 'ducklake:postgres:host=%s port=%s dbname=%s user=%s password=%s'
-                AS lake (DATA_PATH '%s')
-                """, pgHost, pgPort, pgDb, pgUser, pgPass, dataPath));
+            stmt.execute("ATTACH 'ducklake:postgres:dbname=" + pgDb + "' AS lake (DATA_PATH '" + dataPath + "')");
 
             stmt.execute("""
                 CREATE TABLE IF NOT EXISTS lake.kunder (
