@@ -60,7 +60,7 @@ def get_conn() -> duckdb.DuckDBPyConnection:
         os.makedirs(data_path, exist_ok=True)
 
     con.execute(f"""
-        ATTACH 'ducklake:postgres:dbname={POSTGRES_DB}'
+        ATTACH 'ducklake:postgres:host={POSTGRES_HOST} port={POSTGRES_PORT} dbname={POSTGRES_DB} user={POSTGRES_USER} password={POSTGRES_PASSWORD}'
         AS lake (DATA_PATH '{data_path}')
     """)
 
