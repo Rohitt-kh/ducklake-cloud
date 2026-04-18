@@ -2,7 +2,6 @@ import duckdb
 import os
 
 POSTGRES_HOST     = os.getenv("POSTGRES_HOST",     "localhost")
-POSTGRES_PORT     = os.getenv("POSTGRES_PORT",     "5432")
 POSTGRES_DB       = os.getenv("POSTGRES_DB",       "ducklake")
 POSTGRES_USER     = os.getenv("POSTGRES_USER",     "duck")
 POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD", "postgres")
@@ -30,11 +29,13 @@ def get_conn() -> duckdb.DuckDBPyConnection:
     con.execute("INSTALL ducklake; LOAD ducklake")
     con.execute("INSTALL postgres;  LOAD postgres")
 
+    # Använd SECRET för anslutningsdetaljer — port hårdkodas till 5432
+    # för att undvika Kubernetes-konflikt med POSTGRES_PORT-miljövariabeln
     con.execute(f"""
-        CREATE OR REPLACE SECRET pg_secret (
+        CREATE OR REPLACE SECRET (
             TYPE     postgres,
             HOST     '{POSTGRES_HOST}',
-            PORT     {POSTGRES_PORT},
+            PORT     5432,
             DATABASE '{POSTGRES_DB}',
             USER     '{POSTGRES_USER}',
             PASSWORD '{POSTGRES_PASSWORD}'
@@ -44,7 +45,7 @@ def get_conn() -> duckdb.DuckDBPyConnection:
     if S3_ENDPOINT:
         con.execute("INSTALL httpfs; LOAD httpfs")
         con.execute(f"""
-            CREATE OR REPLACE SECRET s3_secret (
+            CREATE OR REPLACE SECRET (
                 TYPE      s3,
                 KEY_ID    '{S3_KEY_ID}',
                 SECRET    '{S3_SECRET}',
@@ -59,8 +60,9 @@ def get_conn() -> duckdb.DuckDBPyConnection:
         data_path = os.getenv("DATA_PATH", "./data/lake/")
         os.makedirs(data_path, exist_ok=True)
 
+    # Använd bara dbname i ATTACH — SECRET hanterar autentiseringen
     con.execute(f"""
-        ATTACH 'ducklake:postgres:host={POSTGRES_HOST} port={POSTGRES_PORT} dbname={POSTGRES_DB} user={POSTGRES_USER} password={POSTGRES_PASSWORD}'
+        ATTACH 'ducklake:postgres:dbname={POSTGRES_DB}'
         AS lake (DATA_PATH '{data_path}')
     """)
 
@@ -68,23 +70,22 @@ def get_conn() -> duckdb.DuckDBPyConnection:
 
 
 def init_db():
-    con = get_conn()
-    con.execute("""
-        CREATE TABLE IF NOT EXISTS lake.kunder (
-            id INTEGER, namn VARCHAR NOT NULL,
-            email VARCHAR NOT NULL, telefon VARCHAR
-        )
-    """)
-    con.execute("""
-        CREATE TABLE IF NOT EXISTS lake.produkter (
-            id INTEGER, namn VARCHAR NOT NULL,
-            pris DOUBLE NOT NULL, lagersaldo INTEGER DEFAULT 0
-        )
-    """)
-    con.execute("""
-        CREATE TABLE IF NOT EXISTS lake.ordrar (
-            id INTEGER, kund_id INTEGER, produkt_id INTEGER,
-            antal INTEGER NOT NULL, skapad TIMESTAMP DEFAULT current_timestamp
-        )
-    """)
-    con.close()
+    with get_conn() as con:
+        con.execute("""
+            CREATE TABLE IF NOT EXISTS lake.kunder (
+                id INTEGER, namn VARCHAR NOT NULL,
+                email VARCHAR NOT NULL, telefon VARCHAR
+            )
+        """)
+        con.execute("""
+            CREATE TABLE IF NOT EXISTS lake.produkter (
+                id INTEGER, namn VARCHAR NOT NULL,
+                pris DOUBLE NOT NULL, lagersaldo INTEGER DEFAULT 0
+            )
+        """)
+        con.execute("""
+            CREATE TABLE IF NOT EXISTS lake.ordrar (
+                id INTEGER, kund_id INTEGER, produkt_id INTEGER,
+                antal INTEGER NOT NULL, skapad TIMESTAMP DEFAULT current_timestamp
+            )
+        """)
