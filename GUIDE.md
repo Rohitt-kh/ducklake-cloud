@@ -8,7 +8,9 @@
 4. [Skapa infrastrukturen på KTH Cloud](#skapa-infrastrukturen)
 5. [Python API](#python-api)
 6. [Java API](#java-api)
-7. [Vanliga fällor och hur man undviker dem](#fällor)
+7. [CI/CD — bygg och pusha Docker-imagen](#cicd--bygg-och-pusha-docker-imagen)
+8. [Vanliga fällor och hur man undviker dem](#fällor)
+9. [Skapa egna API-endpoints](#skapa-egna-api-endpoints)
 
 ---
 
@@ -176,34 +178,46 @@ S3_ENDPOINT = os.getenv("S3_ENDPOINT", "")
 S3_KEY_ID   = os.getenv("S3_KEY_ID",   "minioadmin")
 S3_SECRET   = os.getenv("S3_SECRET",   "minioadmin")
 S3_BUCKET   = os.getenv("S3_BUCKET",   "ducklake")
+S3_REGION   = os.getenv("S3_REGION",   "local")
+
+def _ensure_bucket():
+    # MinIO skapar inte buckets automatiskt — vi måste göra det manuellt
+    if not S3_ENDPOINT:
+        return
+    from minio import Minio
+    client = Minio(S3_ENDPOINT, access_key=S3_KEY_ID, secret_key=S3_SECRET, secure=False)
+    if not client.bucket_exists(S3_BUCKET):
+        client.make_bucket(S3_BUCKET)
 
 def get_conn():
+    _ensure_bucket()
     con = duckdb.connect()
-    con.execute("LOAD ducklake")
-    con.execute("LOAD postgres")
+    con.execute("INSTALL ducklake; LOAD ducklake")
+    con.execute("INSTALL postgres;  LOAD postgres")
 
     # PORT hårdkodas till 5432 — undviker Kubernetes POSTGRES_PORT-konflikt
     con.execute(f"""
         CREATE OR REPLACE SECRET (
-            TYPE postgres,
-            HOST '{POSTGRES_HOST}',
-            PORT 5432,
+            TYPE     postgres,
+            HOST     '{POSTGRES_HOST}',
+            PORT     5432,
             DATABASE '{POSTGRES_DB}',
-            USER '{POSTGRES_USER}',
+            USER     '{POSTGRES_USER}',
             PASSWORD '{POSTGRES_PASSWORD}'
         )
     """)
 
     if S3_ENDPOINT:
-        con.execute("LOAD httpfs")
+        con.execute("INSTALL httpfs; LOAD httpfs")
         con.execute(f"""
             CREATE OR REPLACE SECRET (
-                TYPE s3,
-                KEY_ID '{S3_KEY_ID}',
-                SECRET '{S3_SECRET}',
-                ENDPOINT '{S3_ENDPOINT}',
+                TYPE      s3,
+                KEY_ID    '{S3_KEY_ID}',
+                SECRET    '{S3_SECRET}',
+                REGION    '{S3_REGION}',
+                ENDPOINT  '{S3_ENDPOINT}',
                 URL_STYLE 'path',
-                USE_SSL false
+                USE_SSL   false
             )
         """)
         data_path = f"s3://{S3_BUCKET}/"
@@ -316,7 +330,6 @@ public Connection openConnection() throws SQLException {
         stmt.execute("LOAD ducklake");
         stmt.execute("LOAD postgres");
 
-        // Skapa secret med anslutningsdetaljer
         // OBS: PORT måste vara ett heltal, inte en sträng
         stmt.execute("""
             CREATE OR REPLACE SECRET (
@@ -328,9 +341,27 @@ public Connection openConnection() throws SQLException {
                 PASSWORD '%s'
             )""".formatted(pgHost, pgDb, pgUser, pgPass));
 
-        // Koppla DuckLake till PostgreSQL-katalogen
-        stmt.execute("ATTACH 'ducklake:postgres:dbname=" + pgDb 
-            + "' AS lake (DATA_PATH 's3://" + s3Bucket + "/')");
+        String dataPath;
+        if (!s3Endpoint.isBlank()) {
+            stmt.execute("LOAD httpfs");
+            stmt.execute("""
+                CREATE OR REPLACE SECRET (
+                    TYPE s3,
+                    KEY_ID '%s',
+                    SECRET '%s',
+                    REGION '%s',
+                    ENDPOINT '%s',
+                    URL_STYLE 'path',
+                    USE_SSL false
+                )""".formatted(s3KeyId, s3Secret, s3Region, s3Endpoint));
+            dataPath = "s3://" + s3Bucket + "/";
+        } else {
+            dataPath = "./data/lake/";
+        }
+
+        // Använd bara dbname i ATTACH — SECRET hanterar autentiseringen
+        stmt.execute("ATTACH 'ducklake:postgres:dbname=" + pgDb
+            + "' AS lake (DATA_PATH '" + dataPath + "')");
     }
     return conn;
 }
@@ -394,6 +425,60 @@ CMD ["java", "-jar", "app.jar"]
 
 ---
 
+## CI/CD — bygg och pusha Docker-imagen
+
+Innan du kan driftsätta på KTH Cloud måste Docker-imagen byggas och pushas till ett container-register. Det sköts automatiskt av GitHub Actions — men du behöver göra ett par saker för att det ska fungera.
+
+### Steg 1 — Forka repo:t
+
+Gå till [github.com/WildRelation/ducklake-cloud](https://github.com/WildRelation/ducklake-cloud) och klicka **Fork**. Du behöver ett eget repo för att GitHub Actions ska kunna pusha imagen till ditt konto.
+
+### Steg 2 — Förstå workflows
+
+Repo:t innehåller två workflows i `.github/workflows/`:
+
+| Fil | Triggas när | Bygger imagen |
+|-----|-------------|---------------|
+| `docker.yml` | Push till `main` med ändringar i `api/` | `ghcr.io/<användarnamn>/ducklake-cloud:latest` |
+| `docker-java-api.yml` | Push till `main` med ändringar i `java-api/` | `ghcr.io/<användarnamn>/ducklake-cloud/java-api:latest` |
+
+`secrets.GITHUB_TOKEN` används för autentisering mot GHCR — det är automatiskt, ingen konfiguration behövs.
+
+### Steg 3 — Trigga första bygget
+
+Workflows triggar bara om filer i `api/` respektive `java-api/` ändras. Gör en liten ändring (t.ex. ett blanksteg i `api/requirements.txt`), committa och pusha till `main`:
+
+```bash
+git add .
+git commit -m "trigger first build"
+git push
+```
+
+Gå sedan till **Actions**-fliken på GitHub och vänta tills båda workflows är gröna.
+
+### Steg 4 — Gör paketet publikt
+
+KTH Cloud behöver kunna hämta imagen utan autentisering. Som standard är GHCR-paket privata — du måste göra dem publika:
+
+1. Gå till din GitHub-profil → **Packages**
+2. Klicka på `ducklake-cloud` (och `ducklake-cloud/java-api` om du använder Java)
+3. Välj **Package settings** → **Change visibility** → **Public**
+
+> **OBS:** Om du hoppar över detta steg misslyckas deploymentet på KTH Cloud med `ImagePullBackOff` eller liknande fel.
+
+### Steg 5 — Använd rätt image-namn
+
+Nu kan du använda imagen i KTH Cloud. Image-namnen är:
+
+| API | Image |
+|-----|-------|
+| Python | `ghcr.io/<ditt-användarnamn>/ducklake-cloud:latest` |
+| Java | `ghcr.io/<ditt-användarnamn>/ducklake-cloud/java-api:latest` |
+
+Byt ut `<ditt-användarnamn>` mot ditt GitHub-användarnamn (gemener).
+
+---
+
 ## Fällor
 
 ### 1. POSTGRES_PORT skrivs över av Kubernetes
@@ -406,12 +491,7 @@ Parser Error: syntax error at or near ":"
 LINE 4: PORT tcp://10.43.82.64:5432,
 ```
 
-**Lösning för Java:** Hårdkoda `PORT 5432` direkt i SQL-strängen istället för att läsa från miljövariabel:
-```java
-stmt.execute("... PORT 5432, ...");
-```
-
-**Lösning för Python och Java:** Hårdkoda `PORT 5432` direkt i CREATE SECRET och använd bara `dbname` i ATTACH-strängen. Läs aldrig porten från en miljövariabel.
+**Lösning:** Hårdkoda `PORT 5432` direkt i CREATE SECRET och använd bara `dbname` i ATTACH-strängen. Läs aldrig porten från en miljövariabel.
 
 ---
 
