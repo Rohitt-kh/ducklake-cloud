@@ -1,35 +1,35 @@
-# Tutorial — DuckLake lokalt med Python API
+# Tutorial — DuckLake Locally with Python API
 
-## Förutsättningar
+## Prerequisites
 
 - Docker + Docker Compose
 - Python 3.10+
 
 ---
 
-## Del 1 — Sätt upp DuckLake lokalt
+## Part 1 — Set Up DuckLake Locally
 
-### Steg 1 — Starta tjänsterna
+### Step 1 — Start the services
 
-Kör följande kommando i denna mapp:
+Run the following command in this folder:
 
 ```bash
 docker compose up -d
 ```
 
-Detta startar tre tjänster:
+This starts three services:
 
-| Tjänst | Syfte | Port |
-|--------|-------|------|
-| PostgreSQL | DuckLake-katalog (metadata) | 5432 |
-| MinIO | Parquet-lagring (S3) | 9000 / 9001 |
-| mc | Skapar bucket automatiskt | — |
+| Service | Purpose | Port |
+|---------|---------|------|
+| PostgreSQL | DuckLake catalog (metadata) | 5432 |
+| MinIO | Parquet storage (S3) | 9000 / 9001 |
+| mc | Creates the bucket automatically | — |
 
-MinIO-konsolen når du på `http://localhost:9001` (användare: `ducklake`, lösenord: `minioadmin`).
+The MinIO console is available at `http://localhost:9001` (user: `ducklake`, password: `minioadmin`).
 
 ---
 
-### Steg 2 — Öppna DuckDB-shell
+### Step 2 — Open the DuckDB shell
 
 **Linux/macOS:**
 
@@ -44,24 +44,24 @@ chmod +x shell.sh
 ./shell.ps1
 ```
 
-DuckDB UI öppnas i webbläsaren och `setup.sql` körs automatiskt — du är nu ansluten till ditt DuckLake.
+The DuckDB UI opens in your browser and `setup.sql` runs automatically — you are now connected to your DuckLake.
 
 ---
 
-### Steg 3 — Verifiera
+### Step 3 — Verify
 
-Kör i DuckDB-skalet:
+Run in the DuckDB shell:
 
 ```sql
-CREATE TABLE kunder (id INTEGER, namn VARCHAR, email VARCHAR);
-INSERT INTO kunder VALUES (1, 'Anna', 'anna@example.com');
-SELECT * FROM kunder;
+CREATE TABLE customers (id INTEGER, name VARCHAR, email VARCHAR);
+INSERT INTO customers VALUES (1, 'Anna', 'anna@example.com');
+SELECT * FROM customers;
 ```
 
-Om du ser raden fungerar DuckLake — metadata sparas i PostgreSQL och data som Parquet-filer i MinIO.
+If you see the row, DuckLake is working — metadata is stored in PostgreSQL and data as Parquet files in MinIO.
 
 ---
 
-## Del 2 — Python API
+## Part 2 — Python API
 
-*Kommer snart.*
+*Coming soon.*

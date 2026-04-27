@@ -23,6 +23,6 @@ CREATE OR REPLACE SECRET (
 );
 
 ATTACH 'ducklake:postgres:dbname=ducklake'
-AS mitt_lake (DATA_PATH 's3://ducklake/');
+AS my_lake (DATA_PATH 's3://ducklake/');
 
-USE mitt_lake;
+USE my_lake;
