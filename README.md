@@ -4,7 +4,7 @@ En produktionsliknande DuckLake-datalake med **PostgreSQL** som katalog och **Mi
 
 ---
 
-## Vad är DuckLake?
+## Vad är DuckLake? **
 
 DuckLake är ett öppet lakehouse-format byggt ovanpå DuckDB. Det separerar data i två delar:
 
