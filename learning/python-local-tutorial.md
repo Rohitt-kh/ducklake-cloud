@@ -8,6 +8,8 @@ Python-skript → duckdb-bibliotek → DuckLake (catalog.db + lake-data/)
 
 Ingen PostgreSQL, ingen MinIO, ingen Docker. Allt sparas som vanliga filer på din dator — du kör allt med bara `python` och `pip`.
 
+> **OBS – Windows-användare:** Om `python` eller `pip` inte fungerar i terminalen, använd `py` och `py -m pip` istället. Alla kommandon i den här tutorialen visas i båda varianterna.
+
 ---
 
 ## Vad är en lokal DuckLake?
@@ -101,7 +103,11 @@ print("DuckLake local lab started")
 Kör skriptet:
 
 ```bash
+# Mac/Linux:
 python setup.py
+
+# Windows:
+py setup.py
 ```
 
 Förväntad utmatning:
@@ -117,7 +123,11 @@ Om du ser den här utmatningen fungerar Python-miljön.
 ## 2. Installera duckdb
 
 ```bash
+# Mac/Linux:
 pip install duckdb
+
+# Windows:
+py -m pip install duckdb
 ```
 
 ---
@@ -137,7 +147,11 @@ con.close()
 Kör skriptet:
 
 ```bash
+# Mac/Linux:
 python setup.py
+
+# Windows:
+py setup.py
 ```
 
 Förväntad utmatning:
@@ -170,7 +184,11 @@ con.close()
 Kör skriptet:
 
 ```bash
+# Mac/Linux:
 python setup.py
+
+# Windows:
+py setup.py
 ```
 
 Förväntad utmatning:
@@ -211,7 +229,11 @@ print("Tabell skapad: lake.students")
 Kör skriptet:
 
 ```bash
+# Mac/Linux:
 python setup.py
+
+# Windows:
+py setup.py
 ```
 
 Förväntad utmatning:
@@ -265,7 +287,11 @@ os.makedirs("lake-data", exist_ok=True)
 Kör skriptet:
 
 ```bash
+# Mac/Linux:
 python setup.py
+
+# Windows:
+py setup.py
 ```
 
 Förväntad utmatning (samma som förut — dataclassen ändrar inget beteende ännu):
@@ -301,7 +327,11 @@ print("Lade till 3 studenter")
 Kör skriptet:
 
 ```bash
+# Mac/Linux:
 python setup.py
+
+# Windows:
+py setup.py
 ```
 
 Förväntad utmatning:
@@ -341,7 +371,11 @@ print_students(con)
 Kör skriptet:
 
 ```bash
+# Mac/Linux:
 python setup.py
+
+# Windows:
+py setup.py
 ```
 
 Förväntad utmatning:
@@ -375,7 +409,11 @@ print_students(con)
 Kör skriptet:
 
 ```bash
+# Mac/Linux:
 python setup.py
+
+# Windows:
+py setup.py
 ```
 
 Förväntad utmatning efter uppdateringen:
@@ -405,7 +443,11 @@ print_students(con)
 Kör skriptet:
 
 ```bash
+# Mac/Linux:
 python setup.py
+
+# Windows:
+py setup.py
 ```
 
 Förväntad utmatning efter raderingen:
@@ -498,7 +540,11 @@ print("\nKlart! Kolla catalog.db och lake-data/ i din mapp.")
 Kör skriptet en sista gång:
 
 ```bash
+# Mac/Linux:
 python setup.py
+
+# Windows:
+py setup.py
 ```
 
 Förväntad utmatning:
@@ -620,9 +666,24 @@ def get_students():
 
 ### Kör API:et
 
+Installera paketen:
+
 ```bash
+# Mac/Linux:
 pip install fastapi uvicorn duckdb
+
+# Windows:
+py -m pip install fastapi uvicorn duckdb
+```
+
+Starta API:et:
+
+```bash
+# Mac/Linux:
 uvicorn main:app --reload
+
+# Windows:
+py -m uvicorn main:app --reload
 ```
 
 Testa sedan:
@@ -684,7 +745,11 @@ duckdb==1.5.2       # DuckDB + DuckLake-extension
 Installera med:
 
 ```bash
+# Mac/Linux:
 pip install -r requirements.txt
+
+# Windows:
+py -m pip install -r requirements.txt
 ```
 
 ---
