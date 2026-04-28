@@ -67,6 +67,8 @@ python-local/
 
 > **OBS – Windows-användare:** Om `python` eller `pip` inte fungerar, 
 > prova `py` och `py -m pip` istället.
+
+
 CRUD betyder:
 
 ```
