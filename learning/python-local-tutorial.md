@@ -64,6 +64,9 @@ python-local/
 
 # Del 1 — Python-skript (setup.py)
 
+
+> **OBS – Windows-användare:** Om `python` eller `pip` inte fungerar, 
+> prova `py` och `py -m pip` istället.
 CRUD betyder:
 
 ```
