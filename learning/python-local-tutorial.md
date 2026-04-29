@@ -1,86 +1,97 @@
-# Python Tutorial — Lokal DuckLake (utan moln)
+# Python Tutorial — Local DuckLake (without cloud)
 
-## Hur Python ansluter till en lokal DuckLake
+## How Python connects to a local DuckLake
 
 ```
-Python-skript → duckdb-bibliotek → DuckLake (catalog.db + lake-data/)
+Python script → duckdb library → DuckLake (catalog.db + lake-data/)
 ```
 
-Ingen PostgreSQL, ingen MinIO, ingen Docker. Allt sparas som vanliga filer på din dator — du kör allt med bara `python` och `pip`.
-
-> **OBS – Windows-användare:** Om `python` eller `pip` inte fungerar i terminalen, använd `py` och `py -m pip` istället. Alla kommandon i den här tutorialen visas i båda varianterna.
+No PostgreSQL, no MinIO, no Docker. Everything is saved as regular files on your computer — you run everything with just `python` and `pip`.
 
 ---
 
-## Vad är en lokal DuckLake?
+## What is a local DuckLake?
 
-En lokal DuckLake har samma två delar som molnversionen — men båda körs lokalt:
+A local DuckLake has the same two parts as the cloud version — but both run locally:
 
 ```
-DuckLake (lokalt)
-├── Katalog (catalog.db)
-│   └── En DuckDB-fil — lagrar schema, snapshots, filreferenser
+DuckLake (local)
+├── Catalog (catalog.db)
+│   └── A DuckDB file — stores schema, snapshots, file references
 └── Data (lake-data/)
-    └── En mapp med Parquet-filer — den faktiska datan
+    └── A folder with Parquet files — the actual data
 ```
 
-Du slipper all molnkonfiguration men får ändå DuckLakes fördelar: transaktioner och Parquet-lagring.
+You skip all the cloud configuration but still get DuckLake's benefits: transactions and Parquet storage.
 
 ---
 
-## Jämförelse: Lokalt vs Moln
+## Comparison: Local vs Cloud
 
-| | Lokalt | Moln |
-|--|--------|------|
-| Katalog | `catalog.db` (fil) | PostgreSQL (server) |
-| Lagring | `lake-data/` (mapp) | MinIO / S3 (bucket) |
-| Kräver server | Nej | Ja |
-| Passar för | Lärande, prototyper | Produktion |
-| Delas med andra | Nej | Ja |
-| Starttid | < 1 sekund | Minuter |
+| | Local | Cloud |
+|--|-------|-------|
+| Catalog | `catalog.db` (file) | PostgreSQL (server) |
+| Storage | `lake-data/` (folder) | MinIO / S3 (bucket) |
+| Requires server | No | Yes |
+| Good for | Learning, prototypes | Production |
+| Shared with others | No | Yes |
+| Startup time | < 1 second | Minutes |
 
 ---
 
-## Filstruktur
+## 1. What you will build
 
-Projektet är uppdelat i **två delar** som delar samma lokala DuckLake:
+The project is split into **two parts** that share the same local DuckLake:
 
 ```
 python-local/
-├── Del 1 — skript
-│   └── setup.py            ← Skapar DuckLake och kör CRUD
+├── Part 1 — script
+│   └── setup.py            ← Creates DuckLake and runs CRUD
 │
-├── Del 2 — API
-│   ├── student.py          ← Student-dataclass
-│   ├── database.py         ← Anslutning till DuckLake
-│   ├── main.py             ← FastAPI-endpoints
+├── Part 2 — API
+│   ├── student.py          ← Student dataclass
+│   ├── database.py         ← Connection to DuckLake
+│   ├── main.py             ← FastAPI endpoints
 │   └── requirements.txt
 │
-├── catalog.db              ← Skapas automatiskt (katalog)
-└── lake-data/              ← Skapas automatiskt (Parquet-filer)
+├── catalog.db              ← Created automatically (catalog)
+└── lake-data/              ← Created automatically (Parquet files)
 ```
 
-`catalog.db` och `lake-data/` skapas första gången du kör `setup.py`. Del 2 läser från **exakt samma filer**.
+`catalog.db` and `lake-data/` are created the first time you run `setup.py`. Part 2 reads from **exactly the same files**.
 
 ---
 
-# Del 1 — Python-skript (setup.py)
+## 2. Requirements
 
+Before starting, make sure you have:
 
-> **OBS – Windows-användare:** Om `python` eller `pip` inte fungerar, 
-> prova `py` och `py -m pip` istället.
+- Python 3.10+
+- pip
+- An internet connection the first time DuckDB installs the DuckLake extension
 
-
-CRUD betyder:
+The `requirements.txt` file contains:
 
 ```
-C = Create (skapa)
-R = Read   (läsa)
-U = Update (uppdatera)
-D = Delete (radera)
+fastapi==0.136.0
+uvicorn==0.44.0
+duckdb==1.5.2
 ```
 
-I SQL innebär det:
+---
+
+# Part 1 — Python script (setup.py)
+
+CRUD means:
+
+```
+C = Create
+R = Read
+U = Update
+D = Delete
+```
+
+In SQL, this means:
 
 ```
 CREATE TABLE
@@ -92,49 +103,41 @@ DELETE
 
 ---
 
-## 1. Skapa projektfil och hello world
+## 1. Create a project file and hello world
 
-Skapa en fil `setup.py` med detta innehåll:
+Create a file `setup.py` with this content:
 
 ```python
 print("DuckLake local lab started")
 ```
 
-Kör skriptet:
+Run the script:
 
 ```bash
-# Mac/Linux:
 python setup.py
-
-# Windows:
-py setup.py
 ```
 
-Förväntad utmatning:
+Expected output:
 
 ```
 DuckLake local lab started
 ```
 
-Om du ser den här utmatningen fungerar Python-miljön.
+If you see this output, your Python environment is working.
 
 ---
 
-## 2. Installera duckdb
+## 2. Install duckdb
 
 ```bash
-# Mac/Linux:
 pip install duckdb
-
-# Windows:
-py -m pip install duckdb
 ```
 
 ---
 
-## 3. Anslut till DuckDB
+## 3. Connect to DuckDB
 
-Ersätt innehållet i `setup.py` med:
+Replace the content of `setup.py` with:
 
 ```python
 import duckdb
@@ -144,29 +147,25 @@ print("Connected to DuckDB")
 con.close()
 ```
 
-Kör skriptet:
+Run the script:
 
 ```bash
-# Mac/Linux:
 python setup.py
-
-# Windows:
-py setup.py
 ```
 
-Förväntad utmatning:
+Expected output:
 
 ```
 Connected to DuckDB
 ```
 
-`duckdb.connect()` skapar en in-memory DuckDB-instans.
+`duckdb.connect()` creates an in-memory DuckDB instance.
 
 ---
 
-## 4. Skapa mappar och koppla DuckLake
+## 4. Create folders and attach DuckLake
 
-Uppdatera `setup.py`:
+Update `setup.py`:
 
 ```python
 import duckdb
@@ -181,38 +180,34 @@ print("DuckLake is ready")
 con.close()
 ```
 
-Kör skriptet:
+Run the script:
 
 ```bash
-# Mac/Linux:
 python setup.py
-
-# Windows:
-py setup.py
 ```
 
-Förväntad utmatning:
+Expected output:
 
 ```
 DuckLake is ready
 ```
 
-Det här är en av de viktigaste delarna i labben.
+This is one of the most important parts of the lab.
 
-| Rad | Vad den gör |
-|-----|-------------|
-| `os.makedirs(...)` | Skapar `lake-data/`-mappen om den inte finns |
-| `INSTALL ducklake` | Laddar ner extensionen (bara första gången) |
-| `LOAD ducklake` | Aktiverar extensionen |
-| `ATTACH 'ducklake:catalog.db'` | Kopplar katalogen och datamappen |
+| Line | What it does |
+|------|-------------|
+| `os.makedirs(...)` | Creates the `lake-data/` folder if it does not exist |
+| `INSTALL ducklake` | Downloads the extension (first time only) |
+| `LOAD ducklake` | Activates the extension |
+| `ATTACH 'ducklake:catalog.db'` | Attaches the catalog and data folder |
 
-`ATTACH` skapar `catalog.db` och `lake-data/` automatiskt om de inte finns.
+`ATTACH` creates `catalog.db` and `lake-data/` automatically if they do not exist.
 
 ---
 
-## 5. Skapa students-tabellen
+## 5. Create the students table
 
-Lägg till `CREATE TABLE` i `setup.py`, precis före `con.close()`:
+Add `CREATE TABLE` to `setup.py`, just before `con.close()`:
 
 ```python
 con.execute("""
@@ -223,33 +218,29 @@ con.execute("""
         credits  INTEGER
     )
 """)
-print("Tabell skapad: lake.students")
+print("Table created: lake.students")
 ```
 
-Kör skriptet:
+Run the script:
 
 ```bash
-# Mac/Linux:
 python setup.py
-
-# Windows:
-py setup.py
 ```
 
-Förväntad utmatning:
+Expected output:
 
 ```
 DuckLake is ready
-Tabell skapad: lake.students
+Table created: lake.students
 ```
 
-`IF NOT EXISTS` gör att det inte kraschar om du kör skriptet igen.
+`IF NOT EXISTS` prevents a crash if you run the script again.
 
 ---
 
-## 6. Lägg till Student-dataclass
+## 6. Add the Student dataclass
 
-Lägg till `Student`-dataklassen högst upp i `setup.py`, direkt efter importerna:
+Add the `Student` dataclass at the top of `setup.py`, directly after the imports:
 
 ```python
 from dataclasses import dataclass
@@ -262,9 +253,9 @@ class Student:
     credits: int
 ```
 
-En dataclass i Python motsvarar ett record i Java. Den grupperar fältvärdena för en student på ett strukturerat sätt.
+A dataclass in Python is equivalent to a record in Java. It groups the field values for a student in a structured way.
 
-Skriptet ska nu börja med:
+The script should now begin with:
 
 ```python
 import duckdb
@@ -284,28 +275,24 @@ os.makedirs("lake-data", exist_ok=True)
 # ...
 ```
 
-Kör skriptet:
+Run the script:
 
 ```bash
-# Mac/Linux:
 python setup.py
-
-# Windows:
-py setup.py
 ```
 
-Förväntad utmatning (samma som förut — dataclassen ändrar inget beteende ännu):
+Expected output (same as before — the dataclass does not change the behavior yet):
 
 ```
 DuckLake is ready
-Tabell skapad: lake.students
+Table created: lake.students
 ```
 
 ---
 
-## 7. Lägg till rader (INSERT)
+## 7. Insert rows (INSERT)
 
-Lägg till INSERT-koden i `setup.py` efter `CREATE TABLE`, före `con.close()`:
+Add the INSERT code to `setup.py` after `CREATE TABLE`, before `con.close()`:
 
 ```python
 con.execute("DELETE FROM lake.students")
@@ -321,36 +308,32 @@ for s in students:
         "INSERT INTO lake.students VALUES (?, ?, ?, ?)",
         [s.id, s.name, s.program, s.credits]
     )
-print("Lade till 3 studenter")
+print("Added 3 students")
 ```
 
-Kör skriptet:
+Run the script:
 
 ```bash
-# Mac/Linux:
 python setup.py
-
-# Windows:
-py setup.py
 ```
 
-Förväntad utmatning:
+Expected output:
 
 ```
 DuckLake is ready
-Tabell skapad: lake.students
-Lade till 3 studenter
+Table created: lake.students
+Added 3 students
 ```
 
-`DELETE FROM lake.students` tömmer tabellen innan vi lägger in data. Det gör att utmatningen alltid är densamma, oavsett hur många gånger du kör skriptet.
+`DELETE FROM lake.students` clears the table before inserting data. This makes the output the same every time you run the script.
 
-Varje `INSERT` skapar en ny snapshot i DuckLake — precis som en commit i git.
+Each `INSERT` creates a new snapshot in DuckLake — just like a commit in git.
 
 ---
 
-## 8. Läs data (SELECT)
+## 8. Read data (SELECT)
 
-Lägg till en hjälpfunktion `print_students` i `setup.py` — placera den direkt efter `Student`-dataclassen, före resten av koden:
+Add a helper function `print_students` to `setup.py` — place it directly after the `Student` dataclass, before the rest of the code:
 
 ```python
 def print_students(con):
@@ -361,110 +344,98 @@ def print_students(con):
         print(f"  id={row[0]}, name={row[1]}, program={row[2]}, credits={row[3]}")
 ```
 
-Anropa sedan `print_students` efter INSERT-loopen:
+Then call `print_students` after the INSERT loop:
 
 ```python
-print("\n--- Efter INSERT ---")
+print("\n--- After INSERT ---")
 print_students(con)
 ```
 
-Kör skriptet:
+Run the script:
 
 ```bash
-# Mac/Linux:
 python setup.py
-
-# Windows:
-py setup.py
 ```
 
-Förväntad utmatning:
+Expected output:
 
 ```
 DuckLake is ready
-Tabell skapad: lake.students
-Lade till 3 studenter
+Table created: lake.students
+Added 3 students
 
---- Efter INSERT ---
+--- After INSERT ---
   id=1, name=Alice, program=Datateknik, credits=90
   id=2, name=Bob, program=Medieteknik, credits=60
   id=3, name=Charlie, program=Elektroteknik, credits=45
 ```
 
-Du har nu genomfört `Read`-delen av CRUD.
+You have now completed the `Read` part of CRUD.
 
 ---
 
-## 9. Uppdatera rad (UPDATE)
+## 9. Update a row (UPDATE)
 
-Lägg till dessa rader i `setup.py` efter `print_students`-anropet:
+Add these lines to `setup.py` after the `print_students` call:
 
 ```python
 con.execute("UPDATE lake.students SET credits = 75 WHERE id = 2")
 
-print("\n--- Efter UPDATE ---")
+print("\n--- After UPDATE ---")
 print_students(con)
 ```
 
-Kör skriptet:
+Run the script:
 
 ```bash
-# Mac/Linux:
 python setup.py
-
-# Windows:
-py setup.py
 ```
 
-Förväntad utmatning efter uppdateringen:
+Expected output after the update:
 
 ```
---- Efter UPDATE ---
+--- After UPDATE ---
   id=1, name=Alice, program=Datateknik, credits=90
   id=2, name=Bob, program=Medieteknik, credits=75
   id=3, name=Charlie, program=Elektroteknik, credits=45
 ```
 
-Du har nu genomfört `Update`-delen av CRUD.
+You have now completed the `Update` part of CRUD.
 
 ---
 
-## 10. Radera rad (DELETE)
+## 10. Delete a row (DELETE)
 
-Lägg till dessa rader i `setup.py` efter UPDATE-steget:
+Add these lines to `setup.py` after the UPDATE step:
 
 ```python
 con.execute("DELETE FROM lake.students WHERE id = 3")
 
-print("\n--- Efter DELETE ---")
+print("\n--- After DELETE ---")
 print_students(con)
 ```
 
-Kör skriptet:
+Run the script:
 
 ```bash
-# Mac/Linux:
 python setup.py
-
-# Windows:
-py setup.py
 ```
 
-Förväntad utmatning efter raderingen:
+Expected output after the delete:
 
 ```
---- Efter DELETE ---
+--- After DELETE ---
   id=1, name=Alice, program=Datateknik, credits=90
   id=2, name=Bob, program=Medieteknik, credits=75
 ```
 
-Du har nu genomfört `Delete`-delen av CRUD.
+You have now completed the `Delete` part of CRUD.
 
 ---
 
-## 11. Kontrollera det slutliga setup.py
+## 11. Check your final setup.py
 
-Det slutliga `setup.py` ska se ut så här:
+The final `setup.py` should look like this:
 
 ```python
 import duckdb
@@ -503,7 +474,7 @@ con.execute("""
         credits  INTEGER
     )
 """)
-print("Tabell skapad: lake.students")
+print("Table created: lake.students")
 
 con.execute("DELETE FROM lake.students")
 
@@ -518,72 +489,68 @@ for s in students:
         "INSERT INTO lake.students VALUES (?, ?, ?, ?)",
         [s.id, s.name, s.program, s.credits]
     )
-print("Lade till 3 studenter")
+print("Added 3 students")
 
-print("\n--- Efter INSERT ---")
+print("\n--- After INSERT ---")
 print_students(con)
 
 con.execute("UPDATE lake.students SET credits = 75 WHERE id = 2")
 
-print("\n--- Efter UPDATE ---")
+print("\n--- After UPDATE ---")
 print_students(con)
 
 con.execute("DELETE FROM lake.students WHERE id = 3")
 
-print("\n--- Efter DELETE ---")
+print("\n--- After DELETE ---")
 print_students(con)
 
 con.close()
-print("\nKlart! Kolla catalog.db och lake-data/ i din mapp.")
+print("\nDone! Check catalog.db and lake-data/ in your folder.")
 ```
 
-Kör skriptet en sista gång:
+Run the script one final time:
 
 ```bash
-# Mac/Linux:
 python setup.py
-
-# Windows:
-py setup.py
 ```
 
-Förväntad utmatning:
+Expected output:
 
 ```
 DuckLake is ready
-Tabell skapad: lake.students
-Lade till 3 studenter
+Table created: lake.students
+Added 3 students
 
---- Efter INSERT ---
+--- After INSERT ---
   id=1, name=Alice, program=Datateknik, credits=90
   id=2, name=Bob, program=Medieteknik, credits=60
   id=3, name=Charlie, program=Elektroteknik, credits=45
 
---- Efter UPDATE ---
+--- After UPDATE ---
   id=1, name=Alice, program=Datateknik, credits=90
   id=2, name=Bob, program=Medieteknik, credits=75
   id=3, name=Charlie, program=Elektroteknik, credits=45
 
---- Efter DELETE ---
+--- After DELETE ---
   id=1, name=Alice, program=Datateknik, credits=90
   id=2, name=Bob, program=Medieteknik, credits=75
 
-Klart! Kolla catalog.db och lake-data/ i din mapp.
+Done! Check catalog.db and lake-data/ in your folder.
 ```
 
-Om din utmatning matchar detta fungerar din lokala DuckLake CRUD-applikation.
+If your output matches this, your local DuckLake CRUD application works.
 
-Nu finns den lokala DuckLaken på disk. Del 2 kommer att återanvända exakt samma `catalog.db` och `lake-data/`.
+The local DuckLake now exists on disk. Part 2 will reuse exactly the same `catalog.db` and `lake-data/`.
 
 ---
 
-# Del 2 — FastAPI
+# Part 2 — FastAPI
 
-API:et läser från **samma** `catalog.db` och `lake-data/` som skriptet skapade i Del 1.
+The API reads from the **same** `catalog.db` and `lake-data/` that the script created in Part 1.
 
-### student.py — Student-dataclass
+### student.py — Student dataclass
 
-Skapa filen `student.py` i samma mapp som `main.py`:
+Create the file `student.py` in the same folder as `main.py`:
 
 ```python
 from dataclasses import dataclass
@@ -597,11 +564,11 @@ class Student:
     credits: int
 ```
 
-Samma dataclass som i `setup.py` — nu i en egen fil som API:et kan importera.
+The same dataclass as in `setup.py` — now in its own file that the API can import.
 
-### database.py — ansvar
+### database.py — responsibilities
 
-Hanterar allt som har med DuckLake-anslutningen att göra:
+Handles everything related to the DuckLake connection:
 
 ```python
 import duckdb
@@ -617,13 +584,13 @@ def get_conn() -> duckdb.DuckDBPyConnection:
     return con
 ```
 
-Exakt samma tre rader som i `setup.py` — API:et och skriptet delar filen `catalog.db`.
+Exactly the same three lines as in `setup.py` — the API and the script share the `catalog.db` file.
 
-**Viktigt:** Varje HTTP-anrop skapar en ny connection och stänger den efteråt — se `with get_conn() as con:` nedan.
+**Important:** Each HTTP request creates a new connection and closes it afterwards — see `with get_conn() as con:` below.
 
-### main.py — ansvar
+### main.py — responsibilities
 
-Hanterar HTTP-anropen:
+Handles the HTTP requests:
 
 ```python
 from fastapi import FastAPI
@@ -639,12 +606,12 @@ def health():
 
 
 @app.get("/datasets")
-def lista_datasets():
+def list_datasets():
     with get_conn() as con:
-        tabeller = con.execute(
+        tables = con.execute(
             "SELECT table_name FROM duckdb_tables() WHERE database_name = 'lake'"
         ).fetchall()
-    return [{"name": r[0]} for r in tabeller]
+    return [{"name": r[0]} for r in tables]
 
 
 @app.get("/datasets/students")
@@ -658,35 +625,27 @@ def get_students():
 
 ### Endpoints
 
-| Endpoint | Metod | Vad den returnerar |
-|----------|-------|--------------------|
+| Endpoint | Method | What it returns |
+|----------|--------|----------------|
 | `/health` | GET | `{"status": "ok"}` |
-| `/datasets` | GET | Lista med alla tabellnamn i DuckLake |
-| `/datasets/students` | GET | Alla studenter som JSON |
+| `/datasets` | GET | List of all table names in DuckLake |
+| `/datasets/students` | GET | All students as JSON |
 
-### Kör API:et
+### Run the API
 
-Installera paketen:
+Install the packages:
 
 ```bash
-# Mac/Linux:
 pip install fastapi uvicorn duckdb
-
-# Windows:
-py -m pip install fastapi uvicorn duckdb
 ```
 
-Starta API:et:
+Start the API:
 
 ```bash
-# Mac/Linux:
 uvicorn main:app --reload
-
-# Windows:
-py -m uvicorn main:app --reload
 ```
 
-Testa sedan:
+Then test:
 
 ```bash
 curl http://localhost:8000/health
@@ -694,7 +653,7 @@ curl http://localhost:8000/datasets
 curl http://localhost:8000/datasets/students
 ```
 
-Förväntad utmatning från `/datasets/students` (om du slutförde Del 1):
+Expected output from `/datasets/students` (if you completed Part 1):
 
 ```json
 [
@@ -703,65 +662,61 @@ Förväntad utmatning från `/datasets/students` (om du slutförde Del 1):
 ]
 ```
 
-Eller öppna `http://localhost:8000/docs` för interaktiv API-dokumentation.
+Or open `http://localhost:8000/docs` for interactive API documentation.
 
 ---
 
-## FastAPI — viktiga begrepp
+## FastAPI — key concepts
 
 ### Decorators
 
 ```python
-@app.get("/health")             # Lyssnar på HTTP GET /health
-@app.get("/datasets/students")  # Lyssnar på HTTP GET /datasets/students
+@app.get("/health")             # Listens to HTTP GET /health
+@app.get("/datasets/students")  # Listens to HTTP GET /datasets/students
 ```
 
-En decorator är ett prefix som berättar för FastAPI vilken HTTP-metod och sökväg som gäller.
+A decorator is a prefix that tells FastAPI which HTTP method and path to use.
 
 ### Context manager — `with get_conn() as con:`
 
 ```python
-with get_conn() as con:       # Öppnar anslutning
+with get_conn() as con:       # Opens connection
     rows = con.execute("SELECT ...").fetchall()
-# Stängs automatiskt här — även om ett fel uppstår
+# Closed automatically here — even if an error occurs
 ```
 
-`with`-blocket garanterar att DuckDB-anslutningen stängs korrekt. Det är säkrare än att anropa `con.close()` manuellt.
+The `with` block guarantees that the DuckDB connection is closed correctly. It is safer than calling `con.close()` manually.
 
-### Varför ny connection per anrop?
+### Why a new connection per request?
 
-DuckDB är inte trådsäkert på connection-nivå — flera anrop kan inte dela samma connection-objekt. En connection per HTTP-anrop och `with`-block är det säkra mönstret.
+DuckDB is not thread-safe at the connection level — multiple requests cannot share the same connection object. One connection per HTTP request with a `with` block is the safe pattern.
 
 ---
 
 ## requirements.txt
 
 ```
-fastapi==0.136.0    # Webbramverket
-uvicorn==0.44.0     # ASGI-server som kör FastAPI
-duckdb==1.5.2       # DuckDB + DuckLake-extension
+fastapi==0.136.0
+uvicorn==0.44.0
+duckdb==1.5.2
 ```
 
-Installera med:
+Install with:
 
 ```bash
-# Mac/Linux:
 pip install -r requirements.txt
-
-# Windows:
-py -m pip install -r requirements.txt
 ```
 
 ---
 
-## Viktiga fällor
+## Common pitfalls
 
-1. **Kör `setup.py` innan API:et** — `catalog.db` och `lake-data/` måste finnas. Om du startar API:et utan att ha kört `setup.py` returnerar `/datasets/students` ett fel eftersom tabellen inte existerar.
+1. **Run `setup.py` before the API** — `catalog.db` and `lake-data/` must exist. If you start the API without having run `setup.py`, `/datasets/students` will return an error because the table does not exist.
 
-2. **Kör båda från samma mapp** — `setup.py` och `uvicorn main:app` måste köras från **samma katalog**, annars hittar inte API:et `catalog.db`.
+2. **Run both from the same folder** — `setup.py` and `uvicorn main:app` must be run from the **same directory**, otherwise the API will not find `catalog.db`.
 
-3. **`INSTALL ducklake` behövs bara första gången** — Men det är ofarligt att köra varje gång. DuckDB hoppar över installationen om extensionen redan finns.
+3. **`INSTALL ducklake` is only needed the first time** — But it is harmless to run every time. DuckDB skips the installation if the extension is already installed.
 
-4. **Dela inte connection mellan anrop** — Skapa en ny connection per anrop med `with get_conn() as con:`. Spara aldrig connection-objektet som en global variabel.
+4. **Do not share connections between requests** — Create a new connection per request with `with get_conn() as con:`. Never save the connection object as a global variable.
 
-5. **Parquet-filer raderas inte automatiskt** — Varje snapshot lämnar kvar filer i `lake-data/`. Kör `CALL ducklake_cleanup('lake')` för att rensa bort oanvända filer.
+5. **Parquet files are not deleted automatically** — Each snapshot leaves files in `lake-data/`. Run `CALL ducklake_cleanup('lake')` to remove unused files.
