@@ -78,9 +78,13 @@ uvicorn==0.44.0
 duckdb==1.5.2
 ```
 
-> **Note for Windows users:** Use `py` instead of `python` 
-> and `py -m pip` instead of `pip` throughout this tutorial 
-> if you have multiple Python installations on your computer.
+Install all packages before starting:
+
+```bash
+pip install -r requirements.txt
+```
+
+> **Note for Windows users:** If `pip` does not work, run `py -m pip install -r requirements.txt` instead.
 ---
 
 # Part 1 — Python script (setup.py)
@@ -119,6 +123,8 @@ Run the script:
 ```bash
 python setup.py
 ```
+
+> **Note for Windows users:** If `python` does not work, run `py setup.py` instead.
 
 Expected output:
 
@@ -159,6 +165,8 @@ Run the script:
 python setup.py
 ```
 
+> **Note for Windows users:** If `python` does not work, run `py setup.py` instead.
+
 Expected output:
 
 ```
@@ -191,6 +199,8 @@ Run the script:
 ```bash
 python setup.py
 ```
+
+> **Note for Windows users:** If `python` does not work, run `py setup.py` instead.
 
 Expected output:
 
@@ -232,6 +242,8 @@ Run the script:
 ```bash
 python setup.py
 ```
+
+> **Note for Windows users:** If `python` does not work, run `py setup.py` instead.
 
 Expected output:
 
@@ -287,6 +299,8 @@ Run the script:
 python setup.py
 ```
 
+> **Note for Windows users:** If `python` does not work, run `py setup.py` instead.
+
 Expected output (same as before — the dataclass does not change the behavior yet):
 
 ```
@@ -322,6 +336,8 @@ Run the script:
 ```bash
 python setup.py
 ```
+
+> **Note for Windows users:** If `python` does not work, run `py setup.py` instead.
 
 Expected output:
 
@@ -363,6 +379,8 @@ Run the script:
 python setup.py
 ```
 
+> **Note for Windows users:** If `python` does not work, run `py setup.py` instead.
+
 Expected output:
 
 ```
@@ -397,6 +415,8 @@ Run the script:
 python setup.py
 ```
 
+> **Note for Windows users:** If `python` does not work, run `py setup.py` instead.
+
 Expected output after the update:
 
 ```
@@ -426,6 +446,8 @@ Run the script:
 ```bash
 python setup.py
 ```
+
+> **Note for Windows users:** If `python` does not work, run `py setup.py` instead.
 
 Expected output after the delete:
 
@@ -519,6 +541,8 @@ Run the script one final time:
 ```bash
 python setup.py
 ```
+
+> **Note for Windows users:** If `python` does not work, run `py setup.py` instead.
 
 Expected output:
 
@@ -639,17 +663,13 @@ def get_students():
 
 ### Run the API
 
-Install the packages:
-
-```bash
-pip install fastapi uvicorn duckdb
-```
-
 Start the API:
 
 ```bash
 uvicorn main:app --reload
 ```
+
+> **Note for Windows users:** If `uvicorn` does not work, run `py -m uvicorn main:app --reload` instead.
 
 Then test:
 
