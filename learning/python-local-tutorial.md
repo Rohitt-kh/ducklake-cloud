@@ -133,7 +133,10 @@ If you see this output, your Python environment is working.
 pip install duckdb
 ```
 
----
+> **Note for Windows users:** If `pip` is not recognized, run this instead:
+> ```bash
+> py -m pip install duckdb
+> ```
 
 ## 3. Connect to DuckDB
 
