@@ -78,6 +78,9 @@ uvicorn==0.44.0
 duckdb==1.5.2
 ```
 
+> **Note for Windows users:** Use `py` instead of `python` 
+> and `py -m pip` instead of `pip` throughout this tutorial 
+> if you have multiple Python installations on your computer.
 ---
 
 # Part 1 — Python script (setup.py)
